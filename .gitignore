@@ -1,0 +1,26 @@
+# Sensitive data
+.env
+
+# Python venv, cache and other temporary files
+__pycache__/
+bin/
+include/
+lib/
+lib64
+*.pyc
+*.pyo
+*.pyd
+*.pyw
+*.pyz
+*.pyx
+*.pyj
+
+# Python venv config files
+pyvenv.cfg
+
+# CSV test files
+*.csv
+
+# Nextcloud config files
+.nextcloud/
+.sync-exclude.lst
