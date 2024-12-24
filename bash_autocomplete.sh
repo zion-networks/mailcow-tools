@@ -37,7 +37,7 @@ _mailcow_tools_autocomplete() {
 
     # If the previous word is "mailcow-tools" or "./mailcow-tools", suggest modules
     # If the previous word is a module, suggest commands for that module
-    if [[ ${prev} == "mailcow-tools" || ${prev} == "./mailcow-tools" ]]; then
+    if [[ ${prev} == "mailcow-tools" || ${prev} == "./mailcow-tools" || ${prev} == "./mailcow-tools.sh" ]]; then
         autocomplete_module=true
     else
         # Check if the previous word is a valid module
@@ -83,3 +83,4 @@ _mailcow_tools_autocomplete() {
 # Register the autocompletion function for mailcow-tools and ./mailcow-tools
 complete -F _mailcow_tools_autocomplete mailcow-tools
 complete -F _mailcow_tools_autocomplete ./mailcow-tools
+complete -F _mailcow_tools_autocomplete ./mailcow-tools.sh
