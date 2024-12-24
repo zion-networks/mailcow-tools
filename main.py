@@ -76,7 +76,7 @@ class MailcowTools:
             self.print_help()
             return
         
-        module_instance = self.load_module(module)()
+        module_instance = self.load_module(module)
         
         if not command:
             self.logger.error("Command is required")
@@ -259,6 +259,8 @@ class MailcowTools:
     def print_help(self, module : str|None = None):
         
         if not module:
+            module_names = self.get_module_names(include_help=True)
+            
             self.logger.info(f"Usage: python3 {os.path.basename(__file__)} <module> <command>")
             self.logger.info("")
             self.logger.info("General Commands:")
@@ -266,14 +268,18 @@ class MailcowTools:
             self.logger.info("  help <module>: Print help message for a module")
             self.logger.info("")
             self.logger.info("Modules:")
-            self.logger.info("  mailbox: Manage mailboxes")
-            self.logger.info("  password: Manage passwords")
-            self.logger.info("  syncjob: Manage sync jobs")
+            
+            # TODO: Load module description from static function of the respective module class
+            
+            for module_name in module_names:
+                self.logger.info(f"  {module_name}: ...")
+            
             self.logger.info("")
             self.logger.info("Examples:")
             self.logger.info(f"  python3 {os.path.basename(__file__)} mailbox list - List all mailboxes")
             self.logger.info(f"  python3 {os.path.basename(__file__)} mailbox create contact@example.com - Create a new mailbox with default settings")
             self.logger.info(f"  python3 {os.path.basename(__file__)} mailbox delete contact@example.com - Delete a mailbox")
+        
         else:
             if not self.exists_module(module):
                 self.logger.error(f"Module {module} does not exist")
@@ -294,7 +300,7 @@ class MailcowTools:
     Each module implements the Module class from modules/module.py
     Each module has an __init__.py file that contains the Module class to be loaded
     """
-    def load_module(self, module : str, no_print : bool = False) -> type:
+    def load_module(self, module : str, instantiate : bool = True, no_print : bool = False):
         if not no_print:
             self.logger.debug(f"Loading modules/{module} ...")
         
@@ -311,14 +317,61 @@ class MailcowTools:
         from config import set_use_https
         set_use_https(USE_HTTPS)
 
-        return getattr(module_loader, module.capitalize())
+        module_type = getattr(module_loader, module.capitalize())
+        
+        if instantiate:
+            try:
+                module_instance = module_type()
+            except Exception as e:
+                self.logger.error(f"Failed to create instance of module {module}: {e}")
+                return None
+        else:
+            module_instance = module_type
+        
+        return module_instance
     
+    """
+    Get all module names.
+    
+    @return: List of module names
+    """
+    def get_module_names(self, include_help : bool = False) -> list[str]:
+        module_folders = os.listdir(f"modules")
+        
+        module_names = []
+        for folder in module_folders:
+            # Append only those modules that have an __init__.py file with a class that is a subclass of Module
+            if os.path.isdir(f"modules/{folder}") and os.path.isfile(f"modules/{folder}/__init__.py"):
+                
+                with open(f"modules/{folder}/__init__.py", "r") as file:
+                    contents = file.read()
+                    expected_class_name = "".join([part.capitalize() for part in folder.split("-")])
+                    class_pattern = re.compile(f"class(.*){expected_class_name}(.*)(Module)(.*):")
+                    
+                    if class_pattern.search(contents):
+                        module_names.append(folder)
+        
+        if include_help:
+            module_names.append("help")
+        
+        return module_names
+    
+    """
+    Internal function for bash autocomplete.
+    """
     def _print_modules(self):
-        print("alias mailbox syncjob password")
+        module_names = self.get_module_names(include_help=True)
+        print(" ".join(module_names))
     
+    """
+    Internal function for bash autocomplete.
+    """
     def _print_commands(self, module : str):
-        module_instance = self.load_module(module, no_print=True)()
-        module_instance.print_commands()
+        if module == "help":
+            pass # help is a special command, so we don't need to print anything
+        else:
+            module_instance = self.load_module(module, no_print=True)
+            module_instance.print_commands()
 
 if __name__ == "__main__":
     mt = MailcowTools()
