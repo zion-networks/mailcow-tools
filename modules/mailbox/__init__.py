@@ -74,6 +74,55 @@ class Mailbox(Module):
         return data
     
     """
+    Get a mailbox
+    Path: GET /api/v1/get/mailbox/{mailbox_id}
+    
+    @param mailbox_id: The mailbox ID
+    @return: The mailbox data
+    """
+    @staticmethod
+    def get(mailbox_id : str, no_print : bool = False) -> dict|None:
+        logger = logging.getLogger(__name__)
+        
+        mailcow_host = os.getenv("MAILCOW_TOOLS_MAILCOW_HOST")
+        api_key = os.getenv("MAILCOW_TOOLS_MAILCOW_API_KEY")
+        validate_certificate = True if os.getenv("MAILCOW_TOOLS_VALIDATE_CERTIFICATE") == "true" else False
+        endpoint = f"{('https' if get_use_https() else 'http')}://{mailcow_host}/api/v1/get/mailbox/{mailbox_id}"
+        
+        response = requests.get(endpoint, headers={"X-API-Key": api_key, "Content-Type": "application/json"}, verify=validate_certificate, allow_redirects=False)
+        
+        data = response.json()
+        
+        if response.status_code > 299 or ('type' in data and data['type'] == 'error'):
+            logger.error(f"[{response.status_code}] Failed to get mailbox: {data['msg']}")
+            return None
+        
+        if len(data) == 0:
+            if not no_print:
+                logger.warning(f"[{response.status_code}] Mailbox {mailbox_id} does not exist")
+                
+            return None
+        
+        if not no_print:
+            logger.info(f"-- Mailbox Info - {mailbox_id} --")
+            logger.info("General:")
+            logger.info(f"  - User: {data['name']} <{data['username']}>")
+            logger.info(f"  - Active: {'✅' if data['active'] == 1 else '🚫'}")
+            logger.info(f"  - Relayed: {'✅' if data['is_relayed'] == 1 else '🚫'}")
+            logger.info(f"  - Quota: {int(data['quota_used'] / 1024 / 1024)} MB / {int(data['quota'] / 1024 / 1024)} MB ({int(data['percent_in_use'])} %)")
+            logger.info(f"  - Rate Limit: {'🚫' if data['rl'] == 'false' else data['rl']}")
+            logger.info(f"  - Message Count: {data['messages']}")
+            logger.info(f"  - Spam Aliases: {data['spam_aliases']}")
+            logger.info("")
+            logger.info("Attributes:")
+            logger.info(f"  - SOGo Access: {'✅' if data['attributes']['sogo_access'] == '1' else '🚫'}")
+            logger.info(f"  - Force Password Change: {'✅' if data['attributes']['force_pw_update'] == '1' else '🚫'}")
+            logger.info(f"  - TLS Enforce In: {'✅' if data['attributes']['tls_enforce_in'] == '1' else '🚫'}")
+            logger.info(f"  - TLS Enforce Out: {'✅' if data['attributes']['tls_enforce_out'] == '1' else '🚫'}")
+        
+        return data
+        
+    """
     Check if a mailbox exists
     Path: GET /api/v1/get/mailbox/{mailbox_id}
     
@@ -368,6 +417,7 @@ class Mailbox(Module):
         logger = logging.getLogger(__name__)
         logger.info("Available commands for mailbox module:")
         logger.info("  list: List all mailboxes")
+        logger.info("  get <mailbox_id(str)>: Get a mailbox")
         logger.info("  exists <mailbox_id(str)>: Check if a mailbox exists")
         logger.info("  create <mailbox_id(str)> [full_name(str)] [password(str)] [quota(int)] [active(true|false)] [force_password_change(true|false)] [tls_enforce_in(true|false)] [tls_enforce_out(true|false)]: Create a new mailbox")
         logger.info("  create_batch <path_to_csv(str)> [has_headers(true|false)] [save_to_csv(str)] [override_csv(true|false)] [delimeter(,)] [array_delimeter(|)]: Batch create mailboxes from a CSV file")
@@ -375,7 +425,7 @@ class Mailbox(Module):
         logger.info("  delete <mailbox_id>: Delete a mailbox")
 
     def print_commands(self):
-        print("list exists create create_batch create_batch_template delete")
+        print("list get exists create create_batch create_batch_template delete")
 
 def __getattr__(name):
     return Mailbox
