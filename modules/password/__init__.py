@@ -1,3 +1,5 @@
+import csv
+import json
 import random
 import requests
 import logging
@@ -149,6 +151,89 @@ class Password(Module):
             logger.info("Password is valid")
         
         return True
+    
+    """
+    Set a password for a mailbox
+    
+    Path: /api/v1/edit/mailbox/
+    
+    @param mailbox_id: The ID of the mailbox to set the password for
+    @param password: The password to set for the mailbox
+    """
+    @staticmethod
+    def set(mailbox_id : str, password : str, no_print : bool = False) -> bool:
+        logger = logging.getLogger(__name__)
+        
+        logger.debug(f"Setting password for mailbox {mailbox_id} to {password}")
+        if not Password.validate(password, no_print=True):
+            logger.error("Failed to validate password")
+            return False
+        
+        mailcow_host = os.getenv("MAILCOW_HOST")
+        api_key = os.getenv("MAILCOW_API_KEY")
+        validate_certificate = True if os.getenv("VALIDATE_CERTIFICATE") == "true" else False
+        endpoint = f"{('https' if get_use_https() else 'http')}://{mailcow_host}/api/v1/edit/mailbox/"
+        
+        data = {
+            "items": [ mailbox_id ],
+            "attr": {
+                "password1": password,
+                "password2": password
+            }
+        }
+        
+        post_data_json = json.dumps(data)
+        
+        response = requests.post(endpoint, headers={"X-API-Key": api_key, "Content-Type": "application/json"}, verify=validate_certificate, data=post_data_json, allow_redirects=False)
+        json_response = response.json()
+        
+        if response.status_code > 299 or ('type' in json_response and json_response['type'] == 'error'):
+            logger.error(f"[{response.status_code}] Failed to set password: {json_response['msg']}")
+            return False
+        
+        if not no_print:
+            logger.info("Password set successfully")
+        
+        return True
+    
+    """
+    Set a password for a mailbox from a CSV file
+    
+    Path: /api/v1/edit/mailbox/
+    
+    @param path_to_csv: The path to the CSV file
+    @param has_headers: Whether the CSV file has headers (default: True)
+    @param delimeter: The delimeter to use for the CSV file (default: ,)
+    @param array_delimeter: The delimeter to use for the array in the CSV file (default: |)
+    """
+    @staticmethod
+    def set_batch(path_to_csv : str, has_headers : bool = True, delimeter : str = ",", array_delimeter : str = "|") -> bool:
+        logger = logging.getLogger(__name__)
+        
+        if not os.path.exists(path_to_csv):
+            logger.error(f"File {path_to_csv} does not exist")
+            return False
+        
+        with open(path_to_csv, "r") as file:
+            reader = csv.reader(file, delimiter=delimeter)
+            
+            if has_headers:
+                next(reader)
+            
+            for row in reader:
+                mailbox_id = row[0]
+                password = row[2]
+                
+                if not Password.set(mailbox_id, password, no_print=True):
+                    logger.error(f"Failed to set password for mailbox {mailbox_id}")
+                    continue
+                else:
+                    if logger.level == logging.DEBUG:
+                        logger.debug(f"Set password for mailbox {mailbox_id} to {password}")
+                    else:
+                        logger.info(f"Set password for mailbox {mailbox_id}")
+        
+        return True
 
     def print_help(self):
         logger = logging.getLogger(__name__)
@@ -156,9 +241,11 @@ class Password(Module):
         logger.info("  generate: Generate a password")
         logger.info("  policy: Retrieve the policy for password generation")
         logger.info("  validate <password(str)>: Validate a password")
-
+        logger.info("  set <mailbox_id(str) <password(str)>: Set a password for a mailbox")
+        logger.info("  set_batch <path_to_csv(str)>: Set a password for a mailbox from a CSV file")
+        
     def print_commands(self):
-        print("generate policy validate")
+        print("generate policy validate set set_batch")
 
 def __getattr__(name):
     return Password

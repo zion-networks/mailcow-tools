@@ -25,6 +25,8 @@ class MailcowTools:
             self._print_commands(sys.argv[2])
             return
         
+        load_dotenv()
+        
         self.logger = self.init_logger()
         self.logger.info("Mailcow Tools v0.1.0 by Zion Networks UG")
         self.logger.info("----------------------------------------")
@@ -42,10 +44,6 @@ class MailcowTools:
                 self.print_help()
 
             return
-        
-        self.logger.debug("Loading environment variables")
-        
-        load_dotenv()
         
         self.MAILCOW_HOST = os.getenv("MAILCOW_HOST")
         self.MAILCOW_API_KEY = os.getenv("MAILCOW_API_KEY")
@@ -96,6 +94,11 @@ class MailcowTools:
         
         self.logger.debug(f"Running command {command} in module {module}")
         args = self.prepare_args(command_instance, args)
+        
+        if args is None:
+            return
+        
+        self.logger.debug(f"Calling command {command} with arguments {args}")
         response = command_instance(*args)
         
         if response and isinstance(response, str):
@@ -110,17 +113,22 @@ class MailcowTools:
         else:
             self.logger.debug(f"[{module}.{command}] {response}")
 
-    def prepare_args(self, command_instance : type, args : list) -> list:
+    def prepare_args(self, command_instance : type, args : list) -> list|None:
         arg_count = command_instance.__code__.co_argcount
         arg_names = command_instance.__code__.co_varnames
         arg_defaults = command_instance.__defaults__
         arg_types = typing.get_type_hints(command_instance)
         
+        args_required = []
+        for i in range(arg_count):
+            if arg_names[i] not in arg_defaults:
+                args_required.append(arg_names[i])
+        
         # check if at least the required arguments are present
         if len(args) < arg_count - (len(arg_defaults) if arg_defaults else 0):
             self.logger.error(f"Not enough arguments provided for command {command_instance.__name__}")
-            self.logger.error(f"Required arguments: {arg_names}")
-            return []
+            self.logger.error(f"Required arguments: {args_required}")
+            return None
         
         # try to convert the positional arguments to the correct type based on the type hints
         for i in range(len(args)):
@@ -132,7 +140,7 @@ class MailcowTools:
             
             if arg_type == bool:
                 self.logger.debug(f"Converting argument {arg_name} with value {arg_value} to boolean")
-                arg_value = arg_value.lower() == "true" or arg_value.lower() == "1" or arg_value.lower() == "yes"
+                arg_value = arg_value.lower() == "true" or arg_value.lower() == "1" or arg_value.lower() == "yes" or arg_value.lower() == "y"
             elif arg_type == int:
                 self.logger.debug(f"Converting argument {arg_name} with value {arg_value} to integer")
                 arg_value = int(arg_value)
@@ -150,10 +158,15 @@ class MailcowTools:
     Initialize logging.
     """
     def init_logger(self):
-        self.LOG_LEVEL = os.getenv("LOG_LEVEL")
+        self.LOG_LEVEL = os.getenv("MAILCOW_TOOLS_LOG_LEVEL")
+        
+        if self.LOG_LEVEL is None:
+            self.LOG_LEVEL = "DEBUG"
         
         coloredlogs.install(level=self.LOG_LEVEL)
         logger = logging.getLogger('core')
+        
+        logger.info(f"Logging level set to {self.LOG_LEVEL}")
         
         return logger
     
