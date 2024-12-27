@@ -56,7 +56,7 @@ class SyncJob(Module):
             
             if is_active:
                 if is_running:
-                    logger.info(f"  - 🔄 {id}: {user}@{host} => {destination} (⌛ {interval} min) | 🕒 {last_run})")
+                    logger.info(f"  - 🔄 {id}: {user}@{host} => {destination} (⌛ {interval} min) | 🕒 Syncing ...)")
                 else:
                     if last_success:
                         logger.info(f"  - ✅ {id}: {user}@{host} => {destination} (⌛ {interval} min) | 🕒 {last_run})")
