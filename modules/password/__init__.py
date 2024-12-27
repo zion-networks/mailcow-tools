@@ -8,7 +8,6 @@ import string
 from config import get_use_https
 
 from modules.module import Module
-from main import MailcowTools
 
 class Password(Module):
     def __init__(self):
@@ -165,8 +164,14 @@ class Password(Module):
         logger = logging.getLogger(__name__)
         
         logger.debug(f"Setting password for mailbox {mailbox_id} to {password}")
+        
         if not Password.validate(password, no_print=True):
             logger.error("Failed to validate password")
+            return False
+        
+        from modules.mailbox import Mailbox
+        if not Mailbox.exists(mailbox_id):
+            logger.error(f"Mailbox {mailbox_id} not found")
             return False
         
         mailcow_host = os.getenv("MAILCOW_TOOLS_MAILCOW_HOST")
@@ -177,7 +182,7 @@ class Password(Module):
         data = {
             "items": [ mailbox_id ],
             "attr": {
-                "password1": password,
+                "password": password,
                 "password2": password
             }
         }
