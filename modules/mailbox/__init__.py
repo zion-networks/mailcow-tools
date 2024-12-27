@@ -36,9 +36,9 @@ class Mailbox(Module):
         if include_aliases:
             aliases = Alias.list(no_print=True)
         
-        mailcow_host = os.getenv("MAILCOW_HOST")
-        api_key = os.getenv("MAILCOW_API_KEY")
-        validate_certificate = True if os.getenv("VALIDATE_CERTIFICATE") == "true" else False
+        mailcow_host = os.getenv("MAILCOW_TOOLS_MAILCOW_HOST")
+        api_key = os.getenv("MAILCOW_TOOLS_MAILCOW_API_KEY")
+        validate_certificate = True if os.getenv("MAILCOW_TOOLS_VALIDATE_CERTIFICATE") == "true" else False
         endpoint = f"{('https' if get_use_https() else 'http')}://{mailcow_host}/api/v1/get/mailbox/all"
         
         response = requests.get(endpoint, headers={"X-API-Key": api_key, "Content-Type": "application/json"}, verify=validate_certificate, allow_redirects=False)
@@ -84,9 +84,9 @@ class Mailbox(Module):
     def exists(mailbox_id : str, no_print : bool = False) -> bool:
         logger = logging.getLogger(__name__)
         
-        mailcow_host = os.getenv("MAILCOW_HOST")
-        api_key = os.getenv("MAILCOW_API_KEY")
-        validate_certificate = True if os.getenv("VALIDATE_CERTIFICATE") == "true" else False
+        mailcow_host = os.getenv("MAILCOW_TOOLS_MAILCOW_HOST")
+        api_key = os.getenv("MAILCOW_TOOLS_MAILCOW_API_KEY")
+        validate_certificate = True if os.getenv("MAILCOW_TOOLS_VALIDATE_CERTIFICATE") == "true" else False
         endpoint = f"{('https' if get_use_https() else 'http')}://{mailcow_host}/api/v1/get/mailbox/{mailbox_id}"
         
         response = requests.get(endpoint, headers={"X-API-Key": api_key, "Content-Type": "application/json"}, verify=validate_certificate, allow_redirects=False)
@@ -136,9 +136,9 @@ class Mailbox(Module):
             logger.error(f"Mailbox {mailbox_id} already exists")
             return
         
-        mailcow_host = os.getenv("MAILCOW_HOST")
-        api_key = os.getenv("MAILCOW_API_KEY")
-        validate_certificate = True if os.getenv("VALIDATE_CERTIFICATE") == "true" else False
+        mailcow_host = os.getenv("MAILCOW_TOOLS_MAILCOW_HOST")
+        api_key = os.getenv("MAILCOW_TOOLS_MAILCOW_API_KEY")
+        validate_certificate = True if os.getenv("MAILCOW_TOOLS_VALIDATE_CERTIFICATE") == "true" else False
         endpoint = f"{('https' if get_use_https() else 'http')}://{mailcow_host}/api/v1/add/mailbox"
         
         local_part = mailbox_id.split("@")[0]

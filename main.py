@@ -45,9 +45,9 @@ class MailcowTools:
 
             return
         
-        self.MAILCOW_HOST = os.getenv("MAILCOW_HOST")
-        self.MAILCOW_API_KEY = os.getenv("MAILCOW_API_KEY")
-        self.VALIDATE_CERTIFICATE = True if os.getenv("VALIDATE_CERTIFICATE") == "true" else False
+        self.MAILCOW_HOST = os.getenv("MAILCOW_TOOLS_MAILCOW_HOST")
+        self.MAILCOW_API_KEY = os.getenv("MAILCOW_TOOLS_MAILCOW_API_KEY")
+        self.VALIDATE_CERTIFICATE = True if os.getenv("MAILCOW_TOOLS_VALIDATE_CERTIFICATE") and os.getenv("MAILCOW_TOOLS_VALIDATE_CERTIFICATE").lower() == "true" else False
         
         # Remove the trailing slash from the mailcow host
         self.MAILCOW_HOST = self.MAILCOW_HOST.rstrip("/")

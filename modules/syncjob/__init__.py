@@ -25,9 +25,9 @@ class SyncJob(Module):
     def list():
         logger = logging.getLogger(__name__)
         
-        mailcow_host = os.getenv("MAILCOW_HOST")
-        api_key = os.getenv("MAILCOW_API_KEY")
-        validate_certificate = True if os.getenv("VALIDATE_CERTIFICATE") == "true" else False
+        mailcow_host = os.getenv("MAILCOW_TOOLS_MAILCOW_HOST")
+        api_key = os.getenv("MAILCOW_TOOLS_MAILCOW_API_KEY")
+        validate_certificate = True if os.getenv("MAILCOW_TOOLS_VALIDATE_CERTIFICATE") == "true" else False
         endpoint = f"{('https' if get_use_https() else 'http')}://{mailcow_host}/api/v1/get/syncjobs/all/no_log"
         
         response = requests.get(endpoint, headers={"X-API-Key": api_key, "Content-Type": "application/json"}, verify=validate_certificate, allow_redirects=False)
@@ -200,9 +200,9 @@ class SyncJob(Module):
                 logger.error(f"Exclude must be a valid regex filter (example: (?i)spam|(?i)junk)")
                 return
         
-        mailcow_host = os.getenv("MAILCOW_HOST")
-        api_key = os.getenv("MAILCOW_API_KEY")
-        validate_certificate = True if os.getenv("VALIDATE_CERTIFICATE") == "true" else False
+        mailcow_host = os.getenv("MAILCOW_TOOLS_MAILCOW_HOST")
+        api_key = os.getenv("MAILCOW_TOOLS_MAILCOW_API_KEY")
+        validate_certificate = True if os.getenv("MAILCOW_TOOLS_VALIDATE_CERTIFICATE") == "true" else False
         endpoint = f"{('https' if get_use_https() else 'http')}://{mailcow_host}/api/v1/add/syncjob"
         
         data = {

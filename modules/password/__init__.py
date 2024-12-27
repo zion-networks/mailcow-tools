@@ -22,9 +22,9 @@ class Password(Module):
     def policy(no_print : bool = False):
         logger = logging.getLogger(__name__)
         
-        mailcow_host = os.getenv("MAILCOW_HOST")
-        api_key = os.getenv("MAILCOW_API_KEY")
-        validate_certificate = True if os.getenv("VALIDATE_CERTIFICATE") == "true" else False
+        mailcow_host = os.getenv("MAILCOW_TOOLS_MAILCOW_HOST")
+        api_key = os.getenv("MAILCOW_TOOLS_MAILCOW_API_KEY")
+        validate_certificate = True if os.getenv("MAILCOW_TOOLS_VALIDATE_CERTIFICATE") == "true" else False
         endpoint = f"{('https' if get_use_https() else 'http')}://{mailcow_host}/api/v1/get/passwordpolicy"
         
         response = requests.get(endpoint, headers={"X-API-Key": api_key}, verify=validate_certificate, allow_redirects=False)
@@ -169,9 +169,9 @@ class Password(Module):
             logger.error("Failed to validate password")
             return False
         
-        mailcow_host = os.getenv("MAILCOW_HOST")
-        api_key = os.getenv("MAILCOW_API_KEY")
-        validate_certificate = True if os.getenv("VALIDATE_CERTIFICATE") == "true" else False
+        mailcow_host = os.getenv("MAILCOW_TOOLS_MAILCOW_HOST")
+        api_key = os.getenv("MAILCOW_TOOLS_MAILCOW_API_KEY")
+        validate_certificate = True if os.getenv("MAILCOW_TOOLS_VALIDATE_CERTIFICATE") == "true" else False
         endpoint = f"{('https' if get_use_https() else 'http')}://{mailcow_host}/api/v1/edit/mailbox/"
         
         data = {
