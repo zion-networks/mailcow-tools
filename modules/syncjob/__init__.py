@@ -9,7 +9,7 @@ from modules.module import Module
 """
 Represents a sync job object in Mailcow
 """
-class SyncJob(Module):
+class Syncjob(Module):
     RE_HOSTNAME = r"^[a-zA-Z0-9.-]+$"
     RE_IPV4 = r"^[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}$"
     RE_IPV6 = r"^[a-fA-F0-9:]+$"
@@ -125,7 +125,7 @@ class SyncJob(Module):
             logger.error(f"Mailbox ID must be a valid email address (example: mailbox@domain.tld)")
             return
         
-        if not host or not re.match(SyncJob.RE_HOSTNAME, host) and not re.match(SyncJob.RE_IPV4, host) and not re.match(SyncJob.RE_IPV6, host):
+        if not host or not re.match(Syncjob.RE_HOSTNAME, host) and not re.match(Syncjob.RE_IPV4, host) and not re.match(Syncjob.RE_IPV6, host):
             logger.error(f"Invalid host {host} for mailbox {mailbox_id}")
             logger.error(f"Host must be a valid hostname or IP address (examples: imap.example.com, example.com, imap.mail.example.com, 192.168.1.1)")
             return
@@ -293,7 +293,7 @@ class SyncJob(Module):
                 username = mailbox_id if username_with_domain else mailbox_id.split('@')[0]
                 password = row[2]
                 
-                SyncJob.create(mailbox_id, host, port, username, password, encryption, delete_duplicates_destination, delete_from_source, delete_non_existing_destination, automap, skip_cross_duplicates, active, subscribe_all, interval, subfolder, max_age, max_bytes_per_second, timeout_remote, timeout_local, exclude, custom_params)
+                Syncjob.create(mailbox_id, host, port, username, password, encryption, delete_duplicates_destination, delete_from_source, delete_non_existing_destination, automap, skip_cross_duplicates, active, subscribe_all, interval, subfolder, max_age, max_bytes_per_second, timeout_remote, timeout_local, exclude, custom_params)
     
     """
     Update a sync job
@@ -328,4 +328,4 @@ class SyncJob(Module):
         print("list create create_batch update delete")
 
 def __getattr__(name):
-    return SyncJob
+    return Syncjob
