@@ -17,4 +17,13 @@ Mailcow Tools allows you to manage any Mailcow instance right from the terminal.
 6. (Optional) Enable bash autocompletion: `source bash_autocomplete.sh`
 7. Use it: `./mailcow-tools.sh help`
 
+### Environment Variables
+
+You can either create a `.env` file or use global environment variables. Currently, Mailcow Tools knows these environment variables:
+
+- MAILCOW_TOOLS_MAILCOW_API_KEY=place-your-api-key-here (you can get your API key from your Mailcow web interface: https://mail.mymailcowhost.tld/admin)
+- MAILCOW_TOOLS_MAILCOW_HOST=mail.mymailcowhost.tld
+- MAILCOW_TOOLS_VALIDATE_CERTIFICATE=true (only use `false` if you really know, what you do)
+- MAILCOW_TOOLS_LOG_LEVEL=INFO (Supported: `DEBUG`, `INFO`, `WARNING`, `ERROR`)
+
 The `help` command will list you all available modules. Using `./mailcow-tools.sh help <module>` you can also see the help for a specific module.
