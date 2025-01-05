@@ -315,6 +315,26 @@ class Syncjob(Module):
         logger.warning("Delete a sync job is not implemented yet")
         pass
     
+    """
+    Disable a sync job
+    Path: -
+    """
+    @staticmethod
+    def disable(syncjob_id : str):
+        logger = logging.getLogger(__name__)
+        logger.warning("Disable a sync job is not implemented yet")
+        pass
+    
+    """
+    Enable a sync job
+    Path: -
+    """
+    @staticmethod
+    def enable(syncjob_id : str):
+        logger = logging.getLogger(__name__)
+        logger.warning("Enable a sync job is not implemented yet")
+        pass
+    
     def print_help(self):
         logger = logging.getLogger(__name__)
         logger.info("Available commands for mailbox module:")
@@ -323,9 +343,11 @@ class Syncjob(Module):
         logger.info("  create_batch <path_to_csv(str)> [has_headers(true|false)] [username_with_domain(true|false)] [host(str)] [port(int)] [encryption(SSL|TLS|PLAIN)] [delimeter(str)] [delete_duplicates_destination(true|false)] [delete_from_source(true|false)] [delete_non_existing_destination(true|false)] [automap(true|false)] [skip_cross_duplicates(true|false)] [active(true|false)] [subscribe_all(true|false)] [interval(int)] [subfolder(str)] [max_age(int)] [max_bytes_per_second(int)] [timeout_remote(int)] [timeout_local(int)] [exclude(str)] [custom_params(str)]: Create a new sync job from a CSV file")
         logger.info("  update: Update a sync job")
         logger.info("  delete: Delete a sync job")
+        logger.info("  disable <syncjob_id(str)>: Disable a sync job")
+        logger.info("  enable <syncjob_id(str)>: Enable a sync job")
 
     def print_commands(self):
-        print("list create create_batch update delete")
+        print("list create create_batch update delete disable enable")
 
 def __getattr__(name):
     return Syncjob

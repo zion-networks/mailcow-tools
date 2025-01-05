@@ -54,6 +54,7 @@ class Mailbox(Module):
         
         if not no_print:
             logger.info(f"[{response.status_code}] Found {len(data)} mailboxes with {len(aliases)} aliases:")
+            logger.info("Legend: ✅ = Active, 🚫 = Inactive")
         
         for mailbox in data:
             mailbox_aliases = []
@@ -62,8 +63,8 @@ class Mailbox(Module):
                 mailbox['aliases'] = mailbox_aliases
             
             if not no_print:
-                quota_used = int(mailbox['quota_used']) / 1024 / 1024 if 'quota_used' in mailbox else 0
-                quota = int(mailbox['quota']) / 1024 / 1024 if 'quota' in mailbox else 0
+                quota_used = int(int(mailbox['quota_used']) / 1024 / 1024) if 'quota_used' in mailbox else 0
+                quota = int(int(mailbox['quota']) / 1024 / 1024) if 'quota' in mailbox else 0
                 
                 logger.info(f"  - {'✅' if mailbox['active'] == 1 else '🚫'} {mailbox['username']}: {mailbox['name']} ({quota_used} MB / {quota} MB)")
                 

@@ -114,10 +114,13 @@ class MailcowTools:
             self.logger.debug(f"[{module}.{command}] {response}")
 
     def prepare_args(self, command_instance : type, args : list) -> list|None:
-        arg_count = command_instance.__code__.co_argcount
-        arg_names = command_instance.__code__.co_varnames
-        arg_defaults = command_instance.__defaults__
-        arg_types = typing.get_type_hints(command_instance)
+        arg_count = command_instance.__code__.co_argcount if command_instance.__code__ else 0
+        arg_names = command_instance.__code__.co_varnames if command_instance.__code__ else []
+        arg_defaults = command_instance.__defaults__ if command_instance.__defaults__ else []
+        arg_types = typing.get_type_hints(command_instance) if command_instance else {}
+        
+        module_name = command_instance.__module__.split(".")[-1]
+        command_name = command_instance.__name__
         
         args_required = []
         for i in range(arg_count):
@@ -126,8 +129,20 @@ class MailcowTools:
         
         # check if at least the required arguments are present
         if len(args) < arg_count - (len(arg_defaults) if arg_defaults else 0):
-            self.logger.error(f"Not enough arguments provided for command {command_instance.__name__}")
-            self.logger.error(f"Required arguments: {args_required}")
+            self.logger.error(f"Not enough arguments provided for command {module_name}.{command_name}")
+            
+            argname_type_list = []
+            for arg in args_required:
+                arg_type = arg_types[arg].__name__
+                default_value = arg_defaults[arg] if arg in arg_defaults else None
+                
+                if default_value:
+                    argname_type_list.append(f"[{arg}: {arg_type}{' = ' + str(default_value) if default_value else ''}]")
+                else:
+                    argname_type_list.append(f"<{arg}: {arg_type}>")
+            
+            self.logger.error(f"Required positional arguments: {module_name} {command_name} {' '.join(argname_type_list)}")
+            
             return None
         
         # try to convert the positional arguments to the correct type based on the type hints
